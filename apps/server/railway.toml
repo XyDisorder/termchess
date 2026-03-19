@@ -1,0 +1,9 @@
+[build]
+builder = "nixpacks"
+buildCommand = "pnpm install && pnpm --filter @termchess/protocol build && pnpm --filter @termchess/core build && pnpm --filter @termchess/server build"
+
+[deploy]
+startCommand = "node apps/server/dist/index.js"
+healthcheckPath = "/health"
+healthcheckTimeout = 30
+restartPolicyType = "on_failure"

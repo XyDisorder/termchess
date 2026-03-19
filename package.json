@@ -6,14 +6,14 @@
   "scripts": {
     "dev": "pnpm run --parallel dev:server dev:cli",
     "dev:server": "pnpm --filter @termchess/server dev",
-    "dev:cli": "pnpm --filter @termchess/cli dev",
-    "build": "pnpm --filter @termchess/protocol build && pnpm --filter @termchess/core build && pnpm --filter @termchess/server build && pnpm --filter @termchess/cli build",
+    "dev:cli": "pnpm --filter termchess dev",
+    "build": "pnpm --filter @termchess/protocol build && pnpm --filter @termchess/core build && pnpm --filter @termchess/server build && pnpm --filter termchess build",
     "test": "pnpm -r test",
     "lint": "pnpm -r lint",
     "typecheck": "pnpm -r typecheck",
     "clean": "pnpm -r clean",
-    "cli": "pnpm --filter @termchess/cli start",
-    "solo": "pnpm --filter @termchess/cli start -- solo",
+    "cli": "pnpm --filter termchess start",
+    "solo": "pnpm --filter termchess start -- solo",
     "server": "pnpm --filter @termchess/server start"
   }
 }

@@ -18,8 +18,8 @@
 
 <br />
 
+[![npm](https://img.shields.io/npm/v/termchess?style=flat-square&logo=npm&color=cb3837)](https://www.npmjs.com/package/termchess)
 [![Node](https://img.shields.io/badge/node-%3E%3D20-brightgreen?style=flat-square&logo=node.js&logoColor=white)](https://nodejs.org)
-[![pnpm](https://img.shields.io/badge/pnpm-10.32.1-f69220?style=flat-square&logo=pnpm&logoColor=white)](https://pnpm.io)
 [![TypeScript](https://img.shields.io/badge/TypeScript-strict-3178c6?style=flat-square&logo=typescript&logoColor=white)](https://www.typescriptlang.org)
 [![License](https://img.shields.io/badge/license-MIT-green?style=flat-square)](LICENSE)
 [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-ff69b4?style=flat-square)](CONTRIBUTING.md)
@@ -30,36 +30,27 @@
 
 ## What is this?
 
-TermChess is a fully-featured chess client that runs in your terminal. Pick a mode and start playing — no accounts, no browser, no setup beyond `pnpm install`.
+TermChess is a fully-featured chess client that runs in your terminal. Two modes:
 
 | Mode | Description |
 |---|---|
-| **Solo** | Two players share one terminal. Pass-and-play. |
-| **vs Engine** | Play against Stockfish. Three difficulty levels. |
-| **Multiplayer** | Host a game and share an invite code. Works over local network or internet — the server starts automatically inside the CLI. |
+| **vs Engine** | Play against Stockfish at three difficulty levels. |
+| **Multiplayer** | Host a game — the server starts automatically inside the CLI. Share an invite code and your opponent connects from anywhere. |
 
 ---
 
 ## Install
 
-**Requirements:** Node.js 20+, pnpm
-
 ```bash
-git clone https://github.com/your-org/termchess.git
-cd termchess
-pnpm install && pnpm build
+npm install -g termchess
 ```
 
-Then run:
+**Requirements:** Node.js 20+
+
+Then just run:
 
 ```bash
-node apps/cli/dist/bin.js
-```
-
-Or add an alias to your shell:
-
-```bash
-alias termchess="node /path/to/termchess/apps/cli/dist/bin.js"
+termchess
 ```
 
 ---
@@ -72,25 +63,7 @@ alias termchess="node /path/to/termchess/apps/cli/dist/bin.js"
 <img src="docs/screenshots/menu.png" alt="Main menu" width="600" />
 </div>
 
-Just run `termchess` with no arguments. Navigate with arrow keys, press Enter.
-
-```bash
-termchess
-```
-
----
-
-### Solo — two players, one terminal
-
-<div align="center">
-<img src="docs/screenshots/solo.png" alt="Solo mode — two players sharing a terminal" width="600" />
-</div>
-
-Both players take turns on the same machine. The board flips perspective automatically.
-
-```bash
-termchess solo
-```
+Run `termchess` with no arguments. Navigate with arrow keys, press Enter.
 
 ---
 
@@ -108,49 +81,47 @@ termchess engine easy
 termchess engine hard
 ```
 
-> Requires [Stockfish](https://stockfishchess.org/download/) to be installed and available on `$PATH`.
+> Requires [Stockfish](https://stockfishchess.org/download/) installed and available on `$PATH`.
 
 ---
 
 ### Multiplayer — play over the internet or local network
 
 <div align="center">
-<img src="docs/screenshots/multiplayer-host.png" alt="Hosting a game — invite codes shown" width="600" />
+<img src="docs/screenshots/multiplayer-host.png" alt="Hosting a game — invite codes" width="600" />
 </div>
 
-The host starts a game. TermChess automatically spins up a WebSocket server and generates two invite codes — one for local network, one for internet (via an automatic tunnel, no account needed).
+When you host, TermChess automatically starts a WebSocket server inside the CLI and generates two invite codes — one for local network, one for internet via an automatic tunnel (no account, no port forwarding needed).
 
 **Host:**
+
 ```bash
 termchess
 # → Multiplayer — Host a game
 ```
 
-You'll see:
-
 ```
 ╭──────────────────────────────────────────────────────────╮
 │  Share one of these invite codes:                        │
 │                                                          │
-│  Local network:  ABC123@ws://192.123.1.42:3001/ws        │
+│  Local network:  ABC123@ws://192.168.1.42:3001/ws        │
 │  Internet:       ABC123@wss://hungry-cat.loca.lt/ws      │
 │                                                          │
 │  Opponent runs: termchess → Join → paste the code above  │
 ╰──────────────────────────────────────────────────────────╯
 ```
 
-**Join (from anywhere):**
+**Join:**
+
 ```bash
 termchess
 # → Multiplayer — Join a game
-# → paste the invite code: ABC123@wss://hungry-cat.loca.lt/ws
+# → paste the invite code, e.g: ABC123@wss://hungry-cat.loca.lt/ws
 ```
 
 <div align="center">
 <img src="docs/screenshots/multiplayer-game.png" alt="Multiplayer game in progress" width="600" />
 </div>
-
-> **No port forwarding required.** The internet invite code tunnels through [localtunnel](https://github.com/localtunnel/localtunnel) automatically. For a permanent server, deploy `apps/server` anywhere and set `TERMCHESS_SERVER=ws://your-host:3001/ws`.
 
 ---
 
@@ -167,7 +138,7 @@ e1g1      → kingside castle
 e7e8q     → pawn promotes to queen
 ```
 
-You can also use the **arrow keys + Space** to navigate the board and select squares visually.
+You can also use **arrow keys + Space** to navigate the board visually.
 
 ### Commands
 
@@ -202,6 +173,9 @@ See [docs/architecture.md](docs/architecture.md) for sequence diagrams and full 
 ## Development
 
 ```bash
+# Install dependencies
+pnpm install
+
 # Run server + CLI in parallel with hot reload
 pnpm dev
 
