@@ -3,6 +3,7 @@ import { Box, Text, useInput } from 'ink';
 
 export type MenuChoice =
   | { type: 'solo' }
+  | { type: 'engine' }
   | { type: 'host' }
   | { type: 'join'; code: string };
 
@@ -23,6 +24,7 @@ const LOGO = [
 
 const MENU_ITEMS = [
   { label: 'Solo  (two players, one terminal)', value: 'solo' as const },
+  { label: 'vs Engine  (play against Stockfish)', value: 'engine' as const },
   { label: 'Multiplayer — Host a game', value: 'host' as const },
   { label: 'Multiplayer — Join a game', value: 'join' as const },
 ];
@@ -48,6 +50,8 @@ export function MainMenu({ onSelect }: MainMenuProps): React.ReactElement {
           if (!item) return;
           if (item.value === 'solo') {
             onSelect({ type: 'solo' });
+          } else if (item.value === 'engine') {
+            onSelect({ type: 'engine' });
           } else if (item.value === 'host') {
             onSelect({ type: 'host' });
           } else {
