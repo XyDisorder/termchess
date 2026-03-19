@@ -105,29 +105,25 @@ function getCellBg(
   const isKingInCheck = isCheck && cell.notation === kingSquare;
 
   if (isCursor) return 'cyan';
-  if (isSelected) return 'greenBright';
+  if (isSelected) return 'cyanBright';
   if (isKingInCheck) return 'red';
   if (cell.isHighlighted) return 'yellow';
   if (cell.isLight) return 'white';
-  return 'green'; // dark squares — medium green contrasts with both black and white text
+  return 'blue'; // dark squares
 }
 
-// Piece text color depends on piece color (upper=white, lower=black) AND square bg
-function getCellFg(bg: CellBg, piece: string | null): string {
-  // Special states: always high-contrast dark text
-  if (bg === 'cyan' || bg === 'greenBright' || bg === 'yellow') return 'black';
-  if (bg === 'red') return 'white';
-
-  if (piece === null) return 'black';
-
-  const isWhitePiece = 'KQRBNP'.includes(piece);
-
-  if (bg === 'white') {
-    // Light square: white pieces in gray (visible), black pieces in black (visible)
-    return isWhitePiece ? '#888888' : 'black';
+// Piece color = always high contrast against the square background.
+// White vs black pieces are distinguished by Unicode shape (♔ vs ♚), not text color.
+function getCellFg(bg: CellBg): string {
+  switch (bg) {
+    case 'white':      return 'black';
+    case 'blue':       return 'white';
+    case 'cyan':       return 'black';
+    case 'cyanBright': return 'black';
+    case 'yellow':     return 'black';
+    case 'red':        return 'white';
+    default:           return 'white';
   }
-  // Dark square (green): white pieces in white, black pieces in black — both readable on green
-  return isWhitePiece ? 'white' : 'black';
 }
 
 export function Board({
@@ -252,7 +248,7 @@ export function Board({
                     selectedSquare,
                   );
                   const piece = cell.piece ? (PIECES[cell.piece] ?? cell.piece) : ' ';
-                  const fg = getCellFg(bg, cell.piece);
+                  const fg = getCellFg(bg);
                   return (
                     <Text key={colIdx} backgroundColor={bg} color={fg}>{`   ${piece}   `}</Text>
                   );
