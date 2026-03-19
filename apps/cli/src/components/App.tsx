@@ -49,6 +49,7 @@ export function App({ serverUrl, initialMode }: AppProps): React.ReactElement {
   });
   const [hasAutoActed, setHasAutoActed] = useState(false);
   const [pgnOutput, setPgnOutput] = useState<string | null>(null);
+  const [selectedSquare, setSelectedSquare] = useState<string | null>(null);
 
   // Transition from connecting to lobby when connected
   useEffect(() => {
@@ -285,6 +286,14 @@ export function App({ serverUrl, initialMode }: AppProps): React.ReactElement {
             lastMove={snapshot.lastMove}
             isCheck={snapshot.isCheck}
             perspective={gamePhase.playerColor}
+            selectedSquare={selectedSquare}
+            onSelectSquare={(notation) => setSelectedSquare(notation)}
+            onClearSelection={() => setSelectedSquare(null)}
+            onMove={(uci) => {
+              setSelectedSquare(null);
+              handleInput(uci);
+            }}
+            isInteractive={gamePhase.phase === 'playing' && isPlayerTurn}
           />
           <MoveInput
             onSubmit={handleInput}
@@ -293,7 +302,7 @@ export function App({ serverUrl, initialMode }: AppProps): React.ReactElement {
               isFinished
                 ? '/pgn to export, /quit to exit'
                 : isPlayerTurn
-                ? 'enter move (e2e4) or /help'
+                ? 'enter move (e2e4) or use arrow keys + space'
                 : "opponent's turn..."
             }
           />

@@ -1,5 +1,5 @@
-import React from 'react';
-import { Box, Text } from 'ink';
+import React, { useState } from 'react';
+import { Box, Text, useInput } from 'ink';
 import { type PlayerColor } from '@termchess/protocol';
 import { parseFenToBoard, type BoardCell } from '../utils/board-renderer.js';
 import { PIECES } from '../utils/piece-symbols.js';
@@ -8,7 +8,12 @@ interface BoardProps {
   fen: string;
   lastMove: string | null;
   isCheck: boolean;
-  perspective: PlayerColor; // 'white' | 'black' — flip board for black
+  perspective: PlayerColor;
+  selectedSquare: string | null;          // from-square (owned by parent)
+  onSelectSquare: (notation: string) => void;  // parent sets selectedSquare
+  onClearSelection: () => void;           // parent clears selectedSquare
+  onMove: (uci: string) => void;         // confirmed move (from+to UCI)
+  isInteractive: boolean;
 }
 
 function getKingSquare(fen: string, color: PlayerColor): string | null {
@@ -36,72 +41,225 @@ function getKingSquare(fen: string, color: PlayerColor): string | null {
   return null;
 }
 
-function getCellColors(
+/**
+ * Convert display-grid coordinates (rowIdx, colIdx) to board notation,
+ * taking perspective into account.
+ *
+ * Display coords: rowIdx 0 = top row of display, colIdx 0 = leftmost column.
+ * For white perspective: row 0 = rank 8, col 0 = file a
+ * For black perspective: row 0 = rank 1, col 0 = file h
+ */
+function displayCoordsToNotation(
+  rowIdx: number,
+  colIdx: number,
+  perspective: PlayerColor,
+): string {
+  let rankIdx: number;
+  let fileIdx: number;
+
+  if (perspective === 'white') {
+    rankIdx = rowIdx;       // display row 0 → board rankIdx 0 (rank 8)
+    fileIdx = colIdx;       // display col 0 → file a (idx 0)
+  } else {
+    rankIdx = 7 - rowIdx;   // display row 0 → board rankIdx 7 (rank 1)
+    fileIdx = 7 - colIdx;   // display col 0 → file h (idx 7)
+  }
+
+  const file = String.fromCharCode('a'.charCodeAt(0) + fileIdx);
+  const rank = (8 - rankIdx).toString();
+  return `${file}${rank}`;
+}
+
+/**
+ * Convert board notation to display coordinates for a given perspective.
+ */
+function notationToDisplayCoords(
+  notation: string,
+  perspective: PlayerColor,
+): { rowIdx: number; colIdx: number } {
+  const fileIdx = notation.charCodeAt(0) - 'a'.charCodeAt(0);
+  const rank = parseInt(notation[1] ?? '1', 10);
+  const rankIdx = 8 - rank;  // rank 8 → rankIdx 0
+
+  if (perspective === 'white') {
+    return { rowIdx: rankIdx, colIdx: fileIdx };
+  } else {
+    return { rowIdx: 7 - rankIdx, colIdx: 7 - fileIdx };
+  }
+}
+
+type CellBg = string;
+
+function getCellBg(
   cell: BoardCell,
-  isKingInCheck: boolean,
-): { bg: string; fg: string } {
-  if (isKingInCheck) {
-    return { bg: 'redBright', fg: cell.piece && 'KQRBNP'.includes(cell.piece) ? 'white' : 'black' };
-  }
-  if (cell.isHighlighted) {
-    return { bg: 'yellow', fg: 'black' };
-  }
-  if (cell.isLight) {
-    return { bg: 'white', fg: 'black' };
-  }
-  return { bg: 'gray', fg: 'white' };
+  cursorRowIdx: number,
+  cursorColIdx: number,
+  displayRowIdx: number,
+  displayColIdx: number,
+  isCheck: boolean,
+  kingSquare: string | null,
+  selectedSquare: string | null,
+): CellBg {
+  const isCursor = displayRowIdx === cursorRowIdx && displayColIdx === cursorColIdx;
+  const isSelected = selectedSquare !== null && cell.notation === selectedSquare;
+  const isKingInCheck = isCheck && cell.notation === kingSquare;
+
+  if (isCursor) return 'cyan';
+  if (isSelected) return 'green';
+  if (isKingInCheck) return 'red';
+  if (cell.isHighlighted) return 'yellow';
+  if (cell.isLight) return 'white';
+  return '#555555';
 }
 
-function CellComponent({
-  cell,
-  isKingInCheck,
-}: {
-  cell: BoardCell;
-  isKingInCheck: boolean;
-}): React.ReactElement {
-  const { bg, fg } = getCellColors(cell, isKingInCheck);
-  const symbol = cell.piece ? (PIECES[cell.piece] ?? cell.piece) : ' ';
-
-  return (
-    <Text backgroundColor={bg} color={fg}>
-      {symbol}{' '}
-    </Text>
-  );
+function getCellFg(bg: CellBg): string {
+  if (bg === 'cyan') return 'black';
+  if (bg === 'green') return 'black';
+  if (bg === 'red') return 'white';
+  if (bg === 'yellow') return 'black';
+  if (bg === 'white') return 'black';
+  return 'white';  // dark squares (#555555)
 }
 
-export function Board({ fen, lastMove, isCheck, perspective }: BoardProps): React.ReactElement {
+export function Board({
+  fen,
+  lastMove,
+  isCheck,
+  perspective,
+  selectedSquare,
+  onSelectSquare,
+  onClearSelection,
+  onMove,
+  isInteractive,
+}: BoardProps): React.ReactElement {
+  // Initial cursor position: e2 for white (display row 6, col 4), e7 for black
+  const initialCursor = perspective === 'white'
+    ? { rowIdx: 6, colIdx: 4 }
+    : { rowIdx: 1, colIdx: 3 };
+
+  const [cursor, setCursor] = useState(initialCursor);
+
   const grid = parseFenToBoard(fen, lastMove);
   const turn = fen.split(' ')[1] === 'b' ? 'black' : 'white';
   const kingSquare = isCheck ? getKingSquare(fen, turn) : null;
 
   // Flip board for black perspective
-  const displayGrid = perspective === 'black' ? [...grid].reverse().map((row) => [...row].reverse()) : grid;
+  const displayGrid = perspective === 'black'
+    ? [...grid].reverse().map((row) => [...row].reverse())
+    : grid;
 
   const files = perspective === 'black'
     ? ['h', 'g', 'f', 'e', 'd', 'c', 'b', 'a']
     : ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h'];
 
-  const fileLabel = '  ' + files.join(' ');
+  useInput(
+    (input, key) => {
+      if (!isInteractive) return;
+
+      if (key.upArrow) {
+        setCursor((prev) => ({ ...prev, rowIdx: Math.max(0, prev.rowIdx - 1) }));
+        return;
+      }
+      if (key.downArrow) {
+        setCursor((prev) => ({ ...prev, rowIdx: Math.min(7, prev.rowIdx + 1) }));
+        return;
+      }
+      if (key.leftArrow) {
+        setCursor((prev) => ({ ...prev, colIdx: Math.max(0, prev.colIdx - 1) }));
+        return;
+      }
+      if (key.rightArrow) {
+        setCursor((prev) => ({ ...prev, colIdx: Math.min(7, prev.colIdx + 1) }));
+        return;
+      }
+
+      if (key.escape) {
+        onClearSelection();
+        return;
+      }
+
+      if (input === ' ' || key.return) {
+        const notation = displayCoordsToNotation(cursor.rowIdx, cursor.colIdx, perspective);
+        if (selectedSquare === null) {
+          onSelectSquare(notation);
+        } else {
+          onMove(selectedSquare + notation);
+          onClearSelection();
+        }
+        return;
+      }
+    },
+    { isActive: isInteractive },
+  );
+
+  // File label row: 3-char indent + 3 chars per file
+  const fileLabel = files.map((f) => ` ${f} `).join('');
 
   return (
-    <Box flexDirection="column">
-      <Text color="gray">{fileLabel}</Text>
-      {displayGrid.map((row, rowIdx) => {
-        const rankNum = perspective === 'black' ? rowIdx + 1 : 8 - rowIdx;
-        return (
-          <Box key={rowIdx} flexDirection="row">
-            <Text color="gray">{rankNum} </Text>
-            {row.map((cell, colIdx) => {
-              const isKingInCheck = isCheck && cell.notation === kingSquare;
-              return (
-                <CellComponent key={colIdx} cell={cell} isKingInCheck={isKingInCheck} />
-              );
-            })}
-            <Text color="gray"> {rankNum}</Text>
-          </Box>
-        );
-      })}
-      <Text color="gray">{fileLabel}</Text>
+    <Box justifyContent="center">
+      <Box flexDirection="column">
+        {/* Top file labels */}
+        <Box flexDirection="row">
+          <Text>{'   '}</Text>
+          <Text color="gray">{fileLabel}</Text>
+        </Box>
+
+        {displayGrid.map((row, rowIdx) => {
+          const rankNum = perspective === 'black' ? rowIdx + 1 : 8 - rowIdx;
+          return (
+            <React.Fragment key={rowIdx}>
+              {/* Spacer row (top half of each cell) */}
+              <Box flexDirection="row">
+                <Text>{'   '}</Text>
+                {row.map((cell, colIdx) => {
+                  const bg = getCellBg(
+                    cell,
+                    cursor.rowIdx,
+                    cursor.colIdx,
+                    rowIdx,
+                    colIdx,
+                    isCheck,
+                    kingSquare,
+                    selectedSquare,
+                  );
+                  return (
+                    <Text key={colIdx} backgroundColor={bg}>{'   '}</Text>
+                  );
+                })}
+              </Box>
+
+              {/* Piece row (bottom half of each cell) */}
+              <Box flexDirection="row">
+                <Text color="gray">{` ${rankNum} `}</Text>
+                {row.map((cell, colIdx) => {
+                  const bg = getCellBg(
+                    cell,
+                    cursor.rowIdx,
+                    cursor.colIdx,
+                    rowIdx,
+                    colIdx,
+                    isCheck,
+                    kingSquare,
+                    selectedSquare,
+                  );
+                  const fg = getCellFg(bg);
+                  const piece = cell.piece ? (PIECES[cell.piece] ?? cell.piece) : '·';
+                  return (
+                    <Text key={colIdx} backgroundColor={bg} color={fg}>{` ${piece} `}</Text>
+                  );
+                })}
+                <Text color="gray">{` ${rankNum}`}</Text>
+              </Box>
+            </React.Fragment>
+          );
+        })}
+
+        {/* Bottom file labels */}
+        <Box flexDirection="row">
+          <Text>{'   '}</Text>
+          <Text color="gray">{fileLabel}</Text>
+        </Box>
+      </Box>
     </Box>
   );
 }

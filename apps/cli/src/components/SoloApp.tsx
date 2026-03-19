@@ -32,6 +32,7 @@ export function SoloApp(): React.ReactElement {
     type: 'info',
   });
   const [pgnOutput, setPgnOutput] = useState<string | null>(null);
+  const [selectedSquare, setSelectedSquare] = useState<string | null>(null);
 
   const handleInput = useCallback(
     (input: string) => {
@@ -199,6 +200,14 @@ export function SoloApp(): React.ReactElement {
             lastMove={snapshot.lastMove}
             isCheck={snapshot.isCheck}
             perspective="white"
+            selectedSquare={selectedSquare}
+            onSelectSquare={(notation) => setSelectedSquare(notation)}
+            onClearSelection={() => setSelectedSquare(null)}
+            onMove={(uci) => {
+              setSelectedSquare(null);
+              handleInput(uci);
+            }}
+            isInteractive={phase.phase === 'playing'}
           />
           <MoveInput
             onSubmit={handleInput}
@@ -206,7 +215,7 @@ export function SoloApp(): React.ReactElement {
             placeholder={
               isFinished
                 ? '/pgn to export, /quit to exit'
-                : `${currentPlayerLabel}'s turn — enter move (e2e4) or /help`
+                : `${currentPlayerLabel}'s turn — enter move (e2e4) or use arrow keys + space`
             }
           />
         </Box>

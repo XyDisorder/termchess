@@ -40,7 +40,7 @@ export function MoveInput({ onSubmit, disabled, placeholder }: MoveInputProps): 
     { isActive: !disabled },
   );
 
-  const hint = placeholder ?? 'move (e2e4) or /help';
+  const hint = placeholder ?? 'enter move (e2e4) or use arrow keys + space';
 
   return (
     <Box flexDirection="column" marginTop={1}>
