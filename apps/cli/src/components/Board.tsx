@@ -104,26 +104,18 @@ function getCellBg(
   const isSelected = selectedSquare !== null && cell.notation === selectedSquare;
   const isKingInCheck = isCheck && cell.notation === kingSquare;
 
-  if (isCursor) return 'cyan';
-  if (isSelected) return 'cyanBright';
-  if (isKingInCheck) return 'red';
-  if (cell.isHighlighted) return 'yellow';
-  if (cell.isLight) return 'white';
-  return 'blue'; // dark squares
+  if (isCursor) return '#4fc3f7';
+  if (isSelected) return '#81d4fa';
+  if (isKingInCheck) return '#e53935';
+  if (cell.isHighlighted) return '#f9a825';
+  if (cell.isLight) return '#eeeed2';  // classic cream
+  return '#769656';                    // classic dark green
 }
 
-// Piece color = always high contrast against the square background.
-// White vs black pieces are distinguished by Unicode shape (♔ vs ♚), not text color.
 function getCellFg(bg: CellBg): string {
-  switch (bg) {
-    case 'white':      return 'black';
-    case 'blue':       return 'white';
-    case 'cyan':       return 'black';
-    case 'cyanBright': return 'black';
-    case 'yellow':     return 'black';
-    case 'red':        return 'white';
-    default:           return 'white';
-  }
+  // Light backgrounds → dark text, dark backgrounds → white text
+  if (bg === '#eeeed2' || bg === '#81d4fa' || bg === '#4fc3f7' || bg === '#f9a825') return 'black';
+  return 'white';
 }
 
 export function Board({
@@ -197,8 +189,8 @@ export function Board({
     { isActive: isInteractive },
   );
 
-  // File label row: 3-char indent + 7 chars per file
-  const fileLabel = files.map((f) => `   ${f}   `).join('');
+  // File label row: 3-char indent + 9 chars per file
+  const fileLabel = files.map((f) => `    ${f}    `).join('');
 
   return (
     <Box justifyContent="center">
@@ -228,7 +220,7 @@ export function Board({
                     selectedSquare,
                   );
                   return (
-                    <Text key={colIdx} backgroundColor={bg}>{'       '}</Text>
+                    <Text key={colIdx} backgroundColor={bg}>{'         '}</Text>
                   );
                 })}
               </Box>
@@ -250,7 +242,7 @@ export function Board({
                   const piece = cell.piece ? (PIECES[cell.piece] ?? cell.piece) : ' ';
                   const fg = getCellFg(bg);
                   return (
-                    <Text key={colIdx} backgroundColor={bg} color={fg}>{`   ${piece}   `}</Text>
+                    <Text key={colIdx} backgroundColor={bg} color={fg}>{`    ${piece}    `}</Text>
                   );
                 })}
                 <Text color="gray">{` ${rankNum}`}</Text>
@@ -271,7 +263,7 @@ export function Board({
                     selectedSquare,
                   );
                   return (
-                    <Text key={colIdx} backgroundColor={bg}>{'       '}</Text>
+                    <Text key={colIdx} backgroundColor={bg}>{'         '}</Text>
                   );
                 })}
               </Box>
