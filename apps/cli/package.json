@@ -17,6 +17,7 @@
     "clean": "rm -rf dist"
   },
   "dependencies": {
+    "@termchess/core": "workspace:*",
     "@termchess/protocol": "workspace:*",
     "ink": "^4.4.1",
     "ink-spinner": "^5.0.0",

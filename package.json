@@ -13,6 +13,7 @@
     "typecheck": "pnpm -r typecheck",
     "clean": "pnpm -r clean",
     "cli": "pnpm --filter @termchess/cli start",
+    "solo": "pnpm --filter @termchess/cli start -- solo",
     "server": "pnpm --filter @termchess/server start"
   }
 }

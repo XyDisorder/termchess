@@ -10,6 +10,9 @@ importers:
 
   apps/cli:
     dependencies:
+      '@termchess/core':
+        specifier: workspace:*
+        version: link:../../packages/core
       '@termchess/protocol':
         specifier: workspace:*
         version: link:../../packages/protocol
