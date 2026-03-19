@@ -189,8 +189,14 @@ export function Board({
     { isActive: isInteractive },
   );
 
-  // File label row: 3-char indent + 11 chars per file
-  const fileLabel = files.map((f) => `     ${f}     `).join('');
+  const W = '     '; // 5 spaces per cell
+  const fileLabel = files.map((f) => `  ${f}  `).join('');
+
+  function pad(s: string): string {
+    const p = 5 - s.length;
+    const l = Math.floor(p / 2);
+    return ' '.repeat(l) + s + ' '.repeat(p - l);
+  }
 
   return (
     <Box justifyContent="center">
@@ -203,67 +209,37 @@ export function Board({
 
         {displayGrid.map((row, rowIdx) => {
           const rankNum = perspective === 'black' ? rowIdx + 1 : 8 - rowIdx;
+          const getBg = (cell: BoardCell, colIdx: number) =>
+            getCellBg(cell, cursor.rowIdx, cursor.colIdx, rowIdx, colIdx, isCheck, kingSquare, selectedSquare);
           return (
             <React.Fragment key={rowIdx}>
-              {/* Spacer row (top half of each cell) */}
+              {/* Spacer top */}
               <Box flexDirection="row">
                 <Text>{'   '}</Text>
-                {row.map((cell, colIdx) => {
-                  const bg = getCellBg(
-                    cell,
-                    cursor.rowIdx,
-                    cursor.colIdx,
-                    rowIdx,
-                    colIdx,
-                    isCheck,
-                    kingSquare,
-                    selectedSquare,
-                  );
-                  return (
-                    <Text key={colIdx} backgroundColor={bg}>{'           '}</Text>
-                  );
-                })}
+                {row.map((cell, colIdx) => (
+                  <Text key={colIdx} backgroundColor={getBg(cell, colIdx)}>{W}</Text>
+                ))}
               </Box>
 
-              {/* Piece row (middle of each cell) */}
+              {/* Piece row */}
               <Box flexDirection="row">
                 <Text color="gray">{` ${rankNum} `}</Text>
                 {row.map((cell, colIdx) => {
-                  const bg = getCellBg(
-                    cell,
-                    cursor.rowIdx,
-                    cursor.colIdx,
-                    rowIdx,
-                    colIdx,
-                    isCheck,
-                    kingSquare,
-                    selectedSquare,
-                  );
+                  const bg = getBg(cell, colIdx);
                   const piece = cell.piece ? (PIECES[cell.piece] ?? cell.piece) : ' ';
-                  const fg = getCellFg(bg);
                   return (
-                    <Text key={colIdx} backgroundColor={bg} color={fg}>{`     ${piece}     `}</Text>
+                    <Text key={colIdx} backgroundColor={bg} color={getCellFg(bg)}>{pad(piece)}</Text>
                   );
                 })}
                 <Text color="gray">{` ${rankNum}`}</Text>
               </Box>
 
-              {/* Spacer row 2 (bottom of each cell) */}
+              {/* Spacer bottom */}
               <Box flexDirection="row">
                 <Text>{'   '}</Text>
-                {row.map((cell, colIdx) => {
-                  const bg = getCellBg(cell, cursor.rowIdx, cursor.colIdx, rowIdx, colIdx, isCheck, kingSquare, selectedSquare);
-                  return <Text key={colIdx} backgroundColor={bg}>{'           '}</Text>;
-                })}
-              </Box>
-
-              {/* Spacer row 3 (extra height) */}
-              <Box flexDirection="row">
-                <Text>{'   '}</Text>
-                {row.map((cell, colIdx) => {
-                  const bg = getCellBg(cell, cursor.rowIdx, cursor.colIdx, rowIdx, colIdx, isCheck, kingSquare, selectedSquare);
-                  return <Text key={colIdx} backgroundColor={bg}>{'           '}</Text>;
-                })}
+                {row.map((cell, colIdx) => (
+                  <Text key={colIdx} backgroundColor={getBg(cell, colIdx)}>{W}</Text>
+                ))}
               </Box>
             </React.Fragment>
           );
