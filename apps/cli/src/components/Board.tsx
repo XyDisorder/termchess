@@ -243,7 +243,7 @@ export function Board({
                     selectedSquare,
                   );
                   const fg = getCellFg(bg);
-                  const piece = cell.piece ? (PIECES[cell.piece] ?? cell.piece) : '·';
+                  const piece = cell.piece ? (PIECES[cell.piece] ?? cell.piece) : ' ';
                   return (
                     <Text key={colIdx} backgroundColor={bg} color={fg}>{`  ${piece}  `}</Text>
                   );
