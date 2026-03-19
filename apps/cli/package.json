@@ -4,7 +4,7 @@
   "description": "Chess in your terminal — solo, vs engine, or multiplayer over the internet",
   "type": "module",
   "bin": {
-    "termchess": "./dist/bin.js"
+    "termchess": "dist/bin.js"
   },
   "files": [
     "dist"
