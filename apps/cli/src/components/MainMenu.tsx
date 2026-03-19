@@ -12,6 +12,15 @@ export interface MainMenuProps {
 
 type MenuScreen = 'main' | 'join-input';
 
+const LOGO = [
+  '  ████████╗███████╗██████╗ ███╗   ███╗ ██████╗██╗  ██╗███████╗███████╗███████╗',
+  '     ██╔══╝██╔════╝██╔══██╗████╗ ████║██╔════╝██║  ██║██╔════╝██╔════╝██╔════╝',
+  '     ██║   █████╗  ██████╔╝██╔████╔██║██║     ███████║█████╗  ███████╗███████╗',
+  '     ██║   ██╔══╝  ██╔══██╗██║╚██╔╝██║██║     ██╔══██║██╔══╝  ╚════██║╚════██║',
+  '     ██║   ███████╗██║  ██║██║ ╚═╝ ██║╚██████╗██║  ██║███████╗███████║███████║',
+  '     ╚═╝   ╚══════╝╚═╝  ╚═╝╚═╝     ╚═╝ ╚═════╝╚═╝  ╚═╝╚══════╝╚══════╝╚══════╝',
+];
+
 const MENU_ITEMS = [
   { label: 'Solo  (two players, one terminal)', value: 'solo' as const },
   { label: 'Multiplayer — Host a game', value: 'host' as const },
@@ -102,15 +111,17 @@ export function MainMenu({ onSelect }: MainMenuProps): React.ReactElement {
 
   return (
     <Box flexDirection="column" paddingY={1} paddingX={2}>
-      <Box borderStyle="round" borderColor="cyan" flexDirection="column" paddingX={2} paddingY={1}>
-        {/* Header */}
-        <Box justifyContent="center" marginBottom={1}>
-          <Text color="yellow" bold>  TermChess  </Text>
-        </Box>
-        <Box justifyContent="center" marginBottom={1}>
-          <Text color="gray">Chess in your terminal.</Text>
-        </Box>
+      {/* Big logo above the box */}
+      <Box flexDirection="column" marginBottom={1}>
+        {LOGO.map((line, i) => (
+          <Text key={i} color="cyan" bold>{line}</Text>
+        ))}
+      </Box>
+      <Box justifyContent="center" marginBottom={1}>
+        <Text color="gray">Terminal-native multiplayer chess</Text>
+      </Box>
 
+      <Box borderStyle="round" borderColor="cyan" flexDirection="column" paddingX={2} paddingY={1}>
         {/* Divider */}
         <Box marginBottom={1}>
           <Text color="cyan">{'─'.repeat(37)}</Text>
