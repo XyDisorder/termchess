@@ -7,10 +7,12 @@
     "dev": "pnpm run --parallel dev:server dev:cli",
     "dev:server": "pnpm --filter @termchess/server dev",
     "dev:cli": "pnpm --filter @termchess/cli dev",
-    "build": "pnpm -r --filter=./packages/* build && pnpm -r --filter=./apps/* build",
+    "build": "pnpm --filter @termchess/protocol build && pnpm --filter @termchess/core build && pnpm --filter @termchess/server build && pnpm --filter @termchess/cli build",
     "test": "pnpm -r test",
     "lint": "pnpm -r lint",
     "typecheck": "pnpm -r typecheck",
-    "clean": "pnpm -r clean"
+    "clean": "pnpm -r clean",
+    "cli": "pnpm --filter @termchess/cli start",
+    "server": "pnpm --filter @termchess/server start"
   }
 }
