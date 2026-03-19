@@ -192,8 +192,8 @@ export function Board({
     { isActive: isInteractive },
   );
 
-  // File label row: 3-char indent + 3 chars per file
-  const fileLabel = files.map((f) => ` ${f} `).join('');
+  // File label row: 3-char indent + 5 chars per file
+  const fileLabel = files.map((f) => `  ${f}  `).join('');
 
   return (
     <Box justifyContent="center">
@@ -223,7 +223,7 @@ export function Board({
                     selectedSquare,
                   );
                   return (
-                    <Text key={colIdx} backgroundColor={bg}>{'   '}</Text>
+                    <Text key={colIdx} backgroundColor={bg}>{'     '}</Text>
                   );
                 })}
               </Box>
@@ -245,7 +245,7 @@ export function Board({
                   const fg = getCellFg(bg);
                   const piece = cell.piece ? (PIECES[cell.piece] ?? cell.piece) : '·';
                   return (
-                    <Text key={colIdx} backgroundColor={bg} color={fg}>{` ${piece} `}</Text>
+                    <Text key={colIdx} backgroundColor={bg} color={fg}>{`  ${piece}  `}</Text>
                   );
                 })}
                 <Text color="gray">{` ${rankNum}`}</Text>
