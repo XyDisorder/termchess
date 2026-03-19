@@ -105,20 +105,29 @@ function getCellBg(
   const isKingInCheck = isCheck && cell.notation === kingSquare;
 
   if (isCursor) return 'cyan';
-  if (isSelected) return 'green';
+  if (isSelected) return 'greenBright';
   if (isKingInCheck) return 'red';
   if (cell.isHighlighted) return 'yellow';
   if (cell.isLight) return 'white';
-  return '#555555';
+  return 'green'; // dark squares — medium green contrasts with both black and white text
 }
 
-function getCellFg(bg: CellBg): string {
-  if (bg === 'cyan') return 'black';
-  if (bg === 'green') return 'black';
+// Piece text color depends on piece color (upper=white, lower=black) AND square bg
+function getCellFg(bg: CellBg, piece: string | null): string {
+  // Special states: always high-contrast dark text
+  if (bg === 'cyan' || bg === 'greenBright' || bg === 'yellow') return 'black';
   if (bg === 'red') return 'white';
-  if (bg === 'yellow') return 'black';
-  if (bg === 'white') return 'black';
-  return 'white';  // dark squares (#555555)
+
+  if (piece === null) return 'black';
+
+  const isWhitePiece = 'KQRBNP'.includes(piece);
+
+  if (bg === 'white') {
+    // Light square: white pieces in gray (visible), black pieces in black (visible)
+    return isWhitePiece ? '#888888' : 'black';
+  }
+  // Dark square (green): white pieces in white, black pieces in black — both readable on green
+  return isWhitePiece ? 'white' : 'black';
 }
 
 export function Board({
@@ -192,8 +201,8 @@ export function Board({
     { isActive: isInteractive },
   );
 
-  // File label row: 3-char indent + 5 chars per file
-  const fileLabel = files.map((f) => `  ${f}  `).join('');
+  // File label row: 3-char indent + 7 chars per file
+  const fileLabel = files.map((f) => `   ${f}   `).join('');
 
   return (
     <Box justifyContent="center">
@@ -223,12 +232,12 @@ export function Board({
                     selectedSquare,
                   );
                   return (
-                    <Text key={colIdx} backgroundColor={bg}>{'     '}</Text>
+                    <Text key={colIdx} backgroundColor={bg}>{'       '}</Text>
                   );
                 })}
               </Box>
 
-              {/* Piece row (bottom half of each cell) */}
+              {/* Piece row (middle of each cell) */}
               <Box flexDirection="row">
                 <Text color="gray">{` ${rankNum} `}</Text>
                 {row.map((cell, colIdx) => {
@@ -242,13 +251,33 @@ export function Board({
                     kingSquare,
                     selectedSquare,
                   );
-                  const fg = getCellFg(bg);
                   const piece = cell.piece ? (PIECES[cell.piece] ?? cell.piece) : ' ';
+                  const fg = getCellFg(bg, cell.piece);
                   return (
-                    <Text key={colIdx} backgroundColor={bg} color={fg}>{`  ${piece}  `}</Text>
+                    <Text key={colIdx} backgroundColor={bg} color={fg}>{`   ${piece}   `}</Text>
                   );
                 })}
                 <Text color="gray">{` ${rankNum}`}</Text>
+              </Box>
+
+              {/* Spacer row (bottom of each cell) */}
+              <Box flexDirection="row">
+                <Text>{'   '}</Text>
+                {row.map((cell, colIdx) => {
+                  const bg = getCellBg(
+                    cell,
+                    cursor.rowIdx,
+                    cursor.colIdx,
+                    rowIdx,
+                    colIdx,
+                    isCheck,
+                    kingSquare,
+                    selectedSquare,
+                  );
+                  return (
+                    <Text key={colIdx} backgroundColor={bg}>{'       '}</Text>
+                  );
+                })}
               </Box>
             </React.Fragment>
           );
