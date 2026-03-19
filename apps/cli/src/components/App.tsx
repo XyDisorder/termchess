@@ -25,9 +25,11 @@ interface StatusMessage {
 interface AppProps {
   serverUrl: string;
   initialMode?: 'host' | { join: string } | null;
+  localWsBase?: string;
+  tunnelWsBase?: Promise<string | null>;
 }
 
-export function App({ serverUrl, initialMode }: AppProps): React.ReactElement {
+export function App({ serverUrl, initialMode, localWsBase, tunnelWsBase }: AppProps): React.ReactElement {
   const { exit } = useApp();
   const { status, send, lastMessage, error } = useWebSocket(serverUrl);
   const {
@@ -50,6 +52,13 @@ export function App({ serverUrl, initialMode }: AppProps): React.ReactElement {
   const [hasAutoActed, setHasAutoActed] = useState(false);
   const [pgnOutput, setPgnOutput] = useState<string | null>(null);
   const [selectedSquare, setSelectedSquare] = useState<string | null>(null);
+  const [resolvedTunnelUrl, setResolvedTunnelUrl] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (tunnelWsBase) {
+      tunnelWsBase.then((url) => setResolvedTunnelUrl(url)).catch(() => {});
+    }
+  }, [tunnelWsBase]);
 
   // Transition from connecting to lobby when connected
   useEffect(() => {
@@ -242,16 +251,47 @@ export function App({ serverUrl, initialMode }: AppProps): React.ReactElement {
   }
 
   if (gamePhase.phase === 'waiting') {
+    const localInvite = localWsBase
+      ? `${gamePhase.gameCode}@${localWsBase}/ws`
+      : null;
+    const internetInvite = resolvedTunnelUrl
+      ? `${gamePhase.gameCode}@${resolvedTunnelUrl}/ws`
+      : null;
+
     return (
       <Box flexDirection="column">
         <Box paddingY={1}>
           <Spinner label="Waiting for opponent to join..." />
         </Box>
-        <Box>
-          <Text color="white">Game Code: </Text>
-          <Text color="cyan" bold>{gamePhase.gameCode}</Text>
-          <Text color="gray"> (share with opponent)</Text>
-        </Box>
+        {localInvite ? (
+          <Box borderStyle="round" borderColor="cyan" flexDirection="column" paddingX={2} paddingY={1} marginBottom={1}>
+            <Text color="cyan" bold>Share one of these invite codes:</Text>
+            <Box marginTop={1} flexDirection="column">
+              <Box>
+                <Text color="gray">Local network:  </Text>
+                <Text color="yellow" bold>{localInvite}</Text>
+              </Box>
+              <Box>
+                <Text color="gray">Internet:       </Text>
+                {internetInvite
+                  ? <Text color="green" bold>{internetInvite}</Text>
+                  : <Text color="gray">getting tunnel...</Text>
+                }
+              </Box>
+            </Box>
+            <Box marginTop={1}>
+              <Text color="gray">Opponent runs: </Text>
+              <Text color="white">termchess</Text>
+              <Text color="gray"> → Join → paste the code above</Text>
+            </Box>
+          </Box>
+        ) : (
+          <Box>
+            <Text color="white">Game Code: </Text>
+            <Text color="cyan" bold>{gamePhase.gameCode}</Text>
+            <Text color="gray"> (share with opponent)</Text>
+          </Box>
+        )}
         <Box>
           <Text color="gray">You are playing as </Text>
           <Text color={gamePhase.playerColor === 'white' ? 'white' : 'gray'} bold>

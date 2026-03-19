@@ -2,9 +2,10 @@ import React, { useState } from 'react';
 import { Box, Text, useInput } from 'ink';
 
 export type MenuChoice =
+  | { type: 'solo' }
   | { type: 'engine' }
   | { type: 'host' }
-  | { type: 'join'; code: string };
+  | { type: 'join'; code: string; serverUrl?: string };
 
 export interface MainMenuProps {
   onSelect: (choice: MenuChoice) => void;
@@ -68,9 +69,16 @@ export function MainMenu({ onSelect }: MainMenuProps): React.ReactElement {
           return;
         }
         if (key.return) {
-          const trimmed = joinCode.trim().toUpperCase();
+          const trimmed = joinCode.trim();
           if (trimmed.length > 0) {
-            onSelect({ type: 'join', code: trimmed });
+            const atIndex = trimmed.indexOf('@');
+            if (atIndex !== -1) {
+              const code = trimmed.slice(0, atIndex).toUpperCase();
+              const serverUrl = trimmed.slice(atIndex + 1);
+              onSelect({ type: 'join', code, serverUrl });
+            } else {
+              onSelect({ type: 'join', code: trimmed.toUpperCase() });
+            }
           }
           return;
         }
@@ -96,12 +104,15 @@ export function MainMenu({ onSelect }: MainMenuProps): React.ReactElement {
           <Box justifyContent="center" marginBottom={1}>
             <Text color="cyan" bold>  Join a Game  </Text>
           </Box>
-          <Box marginBottom={1}>
-            <Text color="white">Enter game code: </Text>
-            <Text color="yellow" bold>
-              {joinCode.length > 0 ? joinCode.toUpperCase() : '______'}
-            </Text>
-            <Text color="white">█</Text>
+          <Box marginBottom={1} flexDirection="column">
+            <Box>
+              <Text color="white">Invite code: </Text>
+              <Text color="yellow" bold>
+                {joinCode.length > 0 ? joinCode : '______'}
+              </Text>
+              <Text color="white">█</Text>
+            </Box>
+            <Text color="gray">e.g. ABC123  or  ABC123@wss://xyz.loca.lt/ws</Text>
           </Box>
           <Text color="gray">Enter to confirm   Esc to go back</Text>
         </Box>

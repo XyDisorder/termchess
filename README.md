@@ -1,219 +1,245 @@
-# TermChess
+<div align="center">
 
-**Chess in your terminal. For developers.**
+<!-- Replace with a real screenshot or GIF of the board in action -->
+<img src="docs/screenshots/demo.gif" alt="TermChess demo" width="700" />
 
-![version](https://img.shields.io/badge/version-1.0.0-blue)
-![license](https://img.shields.io/badge/license-MIT-green)
-![node](https://img.shields.io/badge/node-%3E%3D20-brightgreen)
-![pnpm](https://img.shields.io/badge/pnpm-10.32.1-orange)
+<br />
 
 ```
-  a b c d e f g h
-8 ♜ ♞ ♝ ♛ ♚ ♝ ♞ ♜ 8
-7 ♟ ♟ ♟ ♟ ♟ ♟ ♟ ♟ 7
-6 · · · · · · · · 6
-5 · · · · · · · · 5
-4 · · · · ♙ · · · 4
-3 · · · · · · · · 3
-2 ♙ ♙ ♙ ♙ · ♙ ♙ ♙ 2
-1 ♖ ♘ ♗ ♕ ♔ ♗ ♘ ♖ 1
-  a b c d e f g h
+  ████████╗███████╗██████╗ ███╗   ███╗ ██████╗██╗  ██╗███████╗███████╗███████╗
+     ██╔══╝██╔════╝██╔══██╗████╗ ████║██╔════╝██║  ██║██╔════╝██╔════╝██╔════╝
+     ██║   █████╗  ██████╔╝██╔████╔██║██║     ███████║█████╗  ███████╗███████╗
+     ██║   ██╔══╝  ██╔══██╗██║╚██╔╝██║██║     ██╔══██║██╔══╝  ╚════██║╚════██║
+     ██║   ███████╗██║  ██║██║ ╚═╝ ██║╚██████╗██║  ██║███████╗███████║███████║
+     ╚═╝   ╚══════╝╚═╝  ╚═╝╚═╝     ╚═╝ ╚═════╝╚═╝  ╚═╝╚══════╝╚══════╝╚══════╝
 ```
 
----
+**Chess in your terminal. No browser. No server to manage. Just play.**
 
-## Features
+<br />
 
-- **Real-time multiplayer** over WebSockets — one player hosts, the other joins with a 6-character code
-- **Full chess rules** via chess.js — legal move validation, check, checkmate, stalemate, draws by insufficient material / repetition / 50-move rule
-- **Resign and draw offers** — `/resign` to forfeit, `/draw` to offer or accept a draw
-- **Board perspective flip** — the board renders from your color's perspective automatically
-- **Last-move and check highlighting** — yellow for the previous move, red for a king in check
-- **PGN export** — `/pgn` to view the full game notation in-terminal
-- **Strict TypeScript throughout** — branded domain types, Zod-validated WebSocket messages on both sides, no `any`
+[![Node](https://img.shields.io/badge/node-%3E%3D20-brightgreen?style=flat-square&logo=node.js&logoColor=white)](https://nodejs.org)
+[![pnpm](https://img.shields.io/badge/pnpm-10.32.1-f69220?style=flat-square&logo=pnpm&logoColor=white)](https://pnpm.io)
+[![TypeScript](https://img.shields.io/badge/TypeScript-strict-3178c6?style=flat-square&logo=typescript&logoColor=white)](https://www.typescriptlang.org)
+[![License](https://img.shields.io/badge/license-MIT-green?style=flat-square)](LICENSE)
+[![PRs Welcome](https://img.shields.io/badge/PRs-welcome-ff69b4?style=flat-square)](CONTRIBUTING.md)
 
----
-
-## Requirements
-
-- **Node.js 20+**
-- **pnpm 10.32.1** — install with `npm install -g pnpm@10.32.1`
+</div>
 
 ---
 
-## Quick start
+## What is this?
 
-### 1. Install dependencies
+TermChess is a fully-featured chess client that runs in your terminal. Pick a mode and start playing — no accounts, no browser, no setup beyond `pnpm install`.
+
+| Mode | Description |
+|---|---|
+| **Solo** | Two players share one terminal. Pass-and-play. |
+| **vs Engine** | Play against Stockfish. Three difficulty levels. |
+| **Multiplayer** | Host a game and share an invite code. Works over local network or internet — the server starts automatically inside the CLI. |
+
+---
+
+## Install
+
+**Requirements:** Node.js 20+, pnpm
 
 ```bash
 git clone https://github.com/your-org/termchess.git
 cd termchess
-pnpm install
+pnpm install && pnpm build
 ```
 
-### 2. Build everything
+Then run:
 
 ```bash
-pnpm build
+node apps/cli/dist/bin.js
 ```
 
-This builds packages in dependency order: `protocol` → `core` → `server` → `cli`.
-
-### 3. Start the server
+Or add an alias to your shell:
 
 ```bash
-pnpm server
-# or
-node apps/server/dist/index.js
+alias termchess="node /path/to/termchess/apps/cli/dist/bin.js"
 ```
-
-The server starts on `http://localhost:3001`. WebSocket endpoint: `ws://localhost:3001/ws`. Health check: `http://localhost:3001/health`.
-
-### 4. Host a game
-
-In a new terminal:
-
-```bash
-pnpm cli host
-# or
-TERMCHESS_SERVER=ws://localhost:3001/ws node apps/cli/dist/bin.js host
-```
-
-The CLI connects, creates a game, and displays a **6-character game code** (e.g. `ABC123`). Share it with your opponent.
-
-### 5. Join a game
-
-In another terminal (or on another machine pointing at the same server):
-
-```bash
-pnpm cli join ABC123
-# or
-TERMCHESS_SERVER=ws://localhost:3001/ws node apps/cli/dist/bin.js join ABC123
-```
-
-Both terminals transition to the game board. White moves first.
 
 ---
 
-## Playing a game
+## Modes
+
+### Interactive menu
+
+<div align="center">
+<img src="docs/screenshots/menu.png" alt="Main menu" width="600" />
+</div>
+
+Just run `termchess` with no arguments. Navigate with arrow keys, press Enter.
+
+```bash
+termchess
+```
+
+---
+
+### Solo — two players, one terminal
+
+<div align="center">
+<img src="docs/screenshots/solo.png" alt="Solo mode — two players sharing a terminal" width="600" />
+</div>
+
+Both players take turns on the same machine. The board flips perspective automatically.
+
+```bash
+termchess solo
+```
+
+---
+
+### vs Engine — play against Stockfish
+
+<div align="center">
+<img src="docs/screenshots/engine.png" alt="Playing against the engine" width="600" />
+</div>
+
+Three difficulty levels: `easy`, `medium` (default), `hard`.
+
+```bash
+termchess engine           # medium
+termchess engine easy
+termchess engine hard
+```
+
+> Requires [Stockfish](https://stockfishchess.org/download/) to be installed and available on `$PATH`.
+
+---
+
+### Multiplayer — play over the internet or local network
+
+<div align="center">
+<img src="docs/screenshots/multiplayer-host.png" alt="Hosting a game — invite codes shown" width="600" />
+</div>
+
+The host starts a game. TermChess automatically spins up a WebSocket server and generates two invite codes — one for local network, one for internet (via an automatic tunnel, no account needed).
+
+**Host:**
+```bash
+termchess
+# → Multiplayer — Host a game
+```
+
+You'll see:
+
+```
+╭──────────────────────────────────────────────────────────╮
+│  Share one of these invite codes:                        │
+│                                                          │
+│  Local network:  ABC123@ws://192.168.1.42:3001/ws        │
+│  Internet:       ABC123@wss://hungry-cat.loca.lt/ws      │
+│                                                          │
+│  Opponent runs: termchess → Join → paste the code above  │
+╰──────────────────────────────────────────────────────────╯
+```
+
+**Join (from anywhere):**
+```bash
+termchess
+# → Multiplayer — Join a game
+# → paste the invite code: ABC123@wss://hungry-cat.loca.lt/ws
+```
+
+<div align="center">
+<img src="docs/screenshots/multiplayer-game.png" alt="Multiplayer game in progress" width="600" />
+</div>
+
+> **No port forwarding required.** The internet invite code tunnels through [localtunnel](https://github.com/localtunnel/localtunnel) automatically. For a permanent server, deploy `apps/server` anywhere and set `TERMCHESS_SERVER=ws://your-host:3001/ws`.
+
+---
+
+## Playing
 
 ### Entering moves
 
-Moves are entered in **UCI format**: origin square followed by destination square.
+Moves use **UCI format**: origin square + destination square.
 
 ```
-e2e4      # pawn to e4
-g1f3      # knight to f3
-e1g1      # king-side castle
-e7e8q     # pawn promotes to queen
+e2e4      → pawn to e4
+g1f3      → knight to f3
+e1g1      → kingside castle
+e7e8q     → pawn promotes to queen
 ```
 
-Press **Enter** to submit. The server validates the move; illegal moves return an error message without advancing the game.
+You can also use the **arrow keys + Space** to navigate the board and select squares visually.
 
 ### Commands
 
 | Command | Description |
 |---|---|
-| `/help` | Show available commands |
-| `/resign` | Forfeit the current game |
-| `/draw` | Offer a draw (or accept if opponent has offered) |
-| `/pgn` | Print the game PGN to the terminal |
-| `/quit` | Exit the program |
-
-The move input field shows `opponent's turn...` when it is not your move. Commands still work during the opponent's turn.
+| `/resign` | Forfeit the game |
+| `/draw` | Offer a draw (or accept the opponent's offer) |
+| `/pgn` | Print game notation in the terminal |
+| `/help` | Show all commands |
+| `/quit` | Exit |
 
 ---
 
 ## Architecture
-
-TermChess is a **pnpm monorepo** with four packages:
 
 ```
 apps/cli  ──────────────────────►  packages/protocol
 apps/server  ──► packages/core  ──► packages/protocol
 ```
 
-- **`packages/protocol`** — Zod-validated WebSocket message contracts, shared branded types (`GameId`, `PlayerId`, `Fen`, `UciMove`, …), `GameSnapshot` read model
-- **`packages/core`** — pure chess domain logic: `GameSession`, `GameRegistry`, `ChessEngine` (chess.js encapsulated behind an interface), `DomainError`
-- **`apps/server`** — Fastify + `@fastify/websocket`; `SessionManager` bridges live connections to `GameRegistry`; server is fully authoritative for all game state
-- **`apps/cli`** — Ink (React for terminals); `useWebSocket` + `useGameState` hooks drive a `connecting → lobby → waiting → playing → finished` state machine
+| Package | Role |
+|---|---|
+| `packages/protocol` | Zod-validated WebSocket contracts. Shared branded types: `GameId`, `PlayerId`, `Fen`, `UciMove`, `GameSnapshot`. No chess logic. |
+| `packages/core` | Pure chess domain. `ChessEngine` wraps chess.js (no leakage). `GameSession` handles the full lifecycle. `GameRegistry` stores active sessions. |
+| `apps/server` | Fastify + `@fastify/websocket`. `SessionManager` bridges live WS connections to `GameRegistry`. Server is fully authoritative — the CLI never validates moves locally. |
+| `apps/cli` | Ink (React for terminals). `useWebSocket` + `useGameState` drive a `connecting → lobby → waiting → playing → finished` state machine. When hosting, the server runs embedded inside the CLI process. |
 
-See [docs/architecture.md](docs/architecture.md) for the full design document including sequence diagrams, state machine, and design decisions.
+See [docs/architecture.md](docs/architecture.md) for sequence diagrams and full design notes.
 
 ---
 
 ## Development
 
-### Run in development mode (hot reload)
-
 ```bash
-# Server + CLI in parallel
+# Run server + CLI in parallel with hot reload
 pnpm dev
 
-# Server only
-pnpm dev:server
-
-# CLI only
-pnpm dev:cli
-```
-
-### Run all tests
-
-```bash
+# Run all tests
 pnpm test
-```
 
-### Run tests for a specific package
-
-```bash
-pnpm --filter @termchess/core test
-pnpm --filter @termchess/server test
-pnpm --filter @termchess/cli test
-```
-
-### Type-check everything
-
-```bash
+# Type-check everything
 pnpm typecheck
+
+# Build everything
+pnpm build
 ```
-
-### Clean build artifacts
-
-```bash
-pnpm clean
-```
-
----
-
-## MVP limitations
-
-- **In-memory sessions only** — sessions are lost if the server restarts; no persistence
-- **No reconnection** — if a player disconnects, the game is effectively over (the opponent is notified but the session cannot be resumed)
-- **No authentication** — any WebSocket connection gets a random player ID; there is no identity verification
-- **No time controls** — games are untimed
-- **No engine** — human vs human only; no bot opponent
-- **Single server** — not designed for horizontal scaling
 
 ---
 
 ## Roadmap
 
-See [docs/roadmap.md](docs/roadmap.md) for the full plan.
-
 | Version | Theme | Highlights |
 |---|---|---|
 | v0.2 | Quality of life | Reconnection, SAN input, PGN save to file |
-| v0.3 | Features | Hotseat mode, PGN replay, time controls, spectators |
-| v0.4 | Engine | Stockfish integration, difficulty levels |
-| v1.0 | Production | Persistent sessions, SSH key auth, Elo ratings, match history |
+| v0.3 | Features | PGN replay, time controls, spectator mode |
+| v1.0 | Production | Persistent sessions, Elo ratings, match history |
+
+See [docs/roadmap.md](docs/roadmap.md) for the full plan.
 
 ---
 
 ## Contributing
 
-1. Fork the repo and create a feature branch
-2. `pnpm install && pnpm build` to verify the setup
-3. Make changes, add tests, ensure `pnpm test` and `pnpm typecheck` pass
-4. Open a pull request
+1. Fork + feature branch
+2. `pnpm install && pnpm build`
+3. `pnpm test && pnpm typecheck` must pass
+4. Open a PR
 
-All packages use strict TypeScript (`strict: true`, no `any`). New code should follow the same conventions.
+Strict TypeScript throughout — no `any`, branded domain types, Zod on all external boundaries.
+
+---
+
+<div align="center">
+<sub>Built with <a href="https://github.com/vadimdemedes/ink">Ink</a>, <a href="https://github.com/jhlywa/chess.js">chess.js</a>, <a href="https://fastify.dev">Fastify</a>, and too much coffee.</sub>
+</div>
