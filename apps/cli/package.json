@@ -14,7 +14,6 @@
     "typecheck": "tsc -p tsconfig.json --noEmit",
     "test": "vitest run",
     "lint": "eslint src --ext .ts,.tsx",
-    "engine": "node dist/bin.js engine",
     "clean": "rm -rf dist"
   },
   "dependencies": {
