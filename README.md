@@ -132,7 +132,7 @@ You'll see:
 ╭──────────────────────────────────────────────────────────╮
 │  Share one of these invite codes:                        │
 │                                                          │
-│  Local network:  ABC123@ws://192.168.1.42:3001/ws        │
+│  Local network:  ABC123@ws://192.123.1.42:3001/ws        │
 │  Internet:       ABC123@wss://hungry-cat.loca.lt/ws      │
 │                                                          │
 │  Opponent runs: termchess → Join → paste the code above  │
